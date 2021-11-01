@@ -13,13 +13,13 @@ void kmain(struct multiboot* mboot, u32 mboot_magic) {
     assert(mboot_magic == MULTIBOOT_EAX_MAGIC);
     (void)mboot;
 
-    printk("Hello from i686 kmain\n");
+    printk("  Hello from i686 kmain\n");
 
     gdt_install();
-    printk("GDT installed\n");
+    printk("    GDT installed\n");
 
-	idt_install();
-    printk("IDT installed\n");
+    idt_install();
+    printk("    IDT installed\n");
 
     while (1) {}
 

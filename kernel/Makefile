@@ -1,6 +1,5 @@
 CROSS_СС=$(ARCH)-elf-gcc
-NASM=nasm
-
+CROSS_AS=$(ARCH)-elf-as
 KERNEL_CFLAGS=-std=gnu11 -ffreestanding -Wall -Wextra -g
 KERNEL_LDFLAGS=-ffreestanding -nostdlib -lgcc
 
@@ -11,21 +10,21 @@ KERNEL_HEADERS += $(filter-out arch/*, $(wildcard */*.h))
 
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard arch/$(ARCH_FAMILY)/*.c))
 KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.c))
-KERNEL_ASMOBJS = $(patsubst %.asm,%.o,$(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.asm))
+KERNEL_ASMOBJS = $(patsubst %.S,%.o,$(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.S))
 KERNEL_HEADERS += $(wildcard arch/$(ARCH_FAMILY)/*.h)
 KERNEL_HEADERS += $(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.h)
 
 #
 
-%.o: %.asm
-	$(NASM) -f elf32 $< -o $@
+%.o: %.S
+	$(CROSS_AS) -o $@ $<
 
 %.o: %.c $(KERNEL_HEADERS)
 	$(CROSS_СС) $(KERNEL_CFLAGS) -I../ -c -o $@ $<
 
 all: $(KERNEL_OBJS) $(KERNEL_ASMOBJS)
-	$(info $(KERNEL_OBJS))
-	$(info $(KERNEL_HEADERS))
+# $(info $(KERNEL_OBJS))
+# $(info $(KERNEL_HEADERS))
 
 	$(CROSS_СС) $(KERNEL_LDFLAGS) -T arch/$(ARCH_FAMILY)/$(ARCH)/link.ld -o kernel.elf $(KERNEL_ASMOBJS) $(KERNEL_OBJS)
 
