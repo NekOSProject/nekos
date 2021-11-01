@@ -1,15 +1,15 @@
 #include "kterm.h"
 
-#if defined KERNEL_ARCH_IS_i686 || defined KERNEL_ARCH_IS_x86_64
-#include <kernel/arch/x86/vgatext.h>
-#define kterm_putchar vgatext_putchar
-#else
-#error "Unknown CPU architecture specified"
-#endif
+void (*putchar_callback)(char) = 0;
 
-void kterm_putstring(const char* data) {
-    for (int i = 0; i < strlen(data); i++) {
-        kterm_putchar(data[i]);
+void kterm_set_putchar_callback(void (*p)(char)) {
+    putchar_callback = p;
+}
+
+void kterm_putstring(const char* str) {
+    while (*str) {
+        putchar_callback(*str);
+        str++;
     }
 }
 
@@ -33,7 +33,7 @@ void kterm_putint(int i) {
     if(i >= 0) {
         kterm_putuint(i);
     } else {
-        kterm_putchar('-');
+        putchar_callback('-');
         kterm_putuint(-i);
     }
 }
@@ -45,11 +45,11 @@ void kterm_puthex(u32 i) {
     while((i / d == 0) && (d >= 0x10)) d /= 0x10;
     n = i;
     while( d >= 0xF ) {
-        kterm_putchar(hex[n/d]);
+        putchar_callback(hex[n/d]);
         n = n % d;
         d /= 0x10;
     }
-    kterm_putchar(hex[n]);
+    putchar_callback(hex[n]);
 }
 
 
@@ -67,7 +67,7 @@ void kterm_print(char *format, va_list args) {
                 break;
             case 'c':
                 // To-Do: fix this! "warning: cast to pointer from integer of different size"
-                kterm_putchar(va_arg(args, int));
+                putchar_callback(va_arg(args, int));
                 break;
             case 'd':
                 kterm_putint(va_arg(args, int));
@@ -82,10 +82,10 @@ void kterm_print(char *format, va_list args) {
                 kterm_puthex(va_arg(args, u32));
                 break;
             default:
-                kterm_putchar(format[i]);
+                putchar_callback(format[i]);
             }
         } else {
-            kterm_putchar(format[i]);
+            putchar_callback(format[i]);
         }
         i++;
     }

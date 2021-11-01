@@ -42,7 +42,7 @@ void vgatext_backspace() {
         vgatext_column--;
     }
     vgatext_putentryat(32, vgatext_color, vgatext_column, vgatext_row);
-    update_cursor(vgatext_row, vgatext_column);
+    vgatext_update_cursor(vgatext_row, vgatext_column);
 }
 
 void vgatext_setcolor(u8 color) {
@@ -60,7 +60,7 @@ void vgatext_putchar(char c) {
             vgatext_scroll();
         }
     }
-    update_cursor(vgatext_row, vgatext_column);
+    vgatext_update_cursor(vgatext_row, vgatext_column);
 }
 
 void vgatext_scroll() {

@@ -6,4 +6,6 @@
 
 void printk(char *fmt, ... );
 
+void kterm_set_putchar_callback(void (*p)(char));
+
 

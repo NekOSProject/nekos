@@ -1,2 +1,7 @@
 *.code-workspace
 .vscode/*
+kernel/*.o
+kernel/*/*.o
+kernel/*/*/*.o
+kernel/*/*/*/*.o
+kernel/*.elf
