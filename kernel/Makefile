@@ -1,3 +1,7 @@
+# Defauls:
+ARCH_FAMILY=x86
+ARCH=i686
+
 CROSS_СС=$(ARCH)-elf-gcc
 CROSS_AS=$(ARCH)-elf-as
 KERNEL_CFLAGS=-std=gnu11 -ffreestanding -Wall -Wextra -g
@@ -13,8 +17,6 @@ KERNEL_OBJS += $(patsubst %.c,%.o,$(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.c))
 KERNEL_ASMOBJS = $(patsubst %.S,%.o,$(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.S))
 KERNEL_HEADERS += $(wildcard arch/$(ARCH_FAMILY)/*.h)
 KERNEL_HEADERS += $(wildcard arch/$(ARCH_FAMILY)/$(ARCH)/*.h)
-
-#
 
 %.o: %.S
 	$(CROSS_AS) -o $@ $<
