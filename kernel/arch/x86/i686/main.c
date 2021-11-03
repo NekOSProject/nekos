@@ -1,6 +1,7 @@
 #include <kernel/types.h>
 
 #include "../vgatext.h"
+#include "../debug.h"
 #include <kernel/libk/assert.h>
 #include <kernel/multiboot.h>
 #include <kernel/io/kterm.h>
@@ -10,7 +11,11 @@ extern void gdt_install(void);
 extern void idt_install(void);
 
 void kmain(struct multiboot* mboot, u32 mboot_magic) {
+    kterm_set_putchar_callback(debug_putchar);
+    printk("Hello, world!");
+
     #define PREF "[ARCH i686]: "
+
     vgatext_init((void *)0xB8000);
     kterm_set_putchar_callback(vgatext_putchar);
     assert(mboot_magic == MULTIBOOT_EAX_MAGIC);
@@ -31,3 +36,4 @@ void kmain(struct multiboot* mboot, u32 mboot_magic) {
     // generic_main();
     #undef PREF
 }
+
