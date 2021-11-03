@@ -1,0 +1,1 @@
+qemu-system-i386 -m 512 -cdrom HOS.iso -monitor stdio -serial file:hos.log

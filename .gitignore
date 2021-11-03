@@ -1,4 +1,7 @@
 *.code-workspace
+*.iso
+isodir/*
+*.log
 .vscode/*
 kernel/*.o
 kernel/*/*.o
