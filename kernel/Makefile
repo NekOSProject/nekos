@@ -30,6 +30,9 @@ all: $(KERNEL_OBJS) $(KERNEL_ASMOBJS)
 
 	$(CROSS_СС) $(KERNEL_LDFLAGS) -T arch/$(ARCH_FAMILY)/$(ARCH)/link.ld -o kernel.elf $(KERNEL_ASMOBJS) $(KERNEL_OBJS)
 
+build-run: all
+	qemu-system-i386 -kernel kernel.elf
+
 clean:
 	-rm -f kernel.elf
 	-rm -f ${KERNEL_ASMOBJS}
