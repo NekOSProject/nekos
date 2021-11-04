@@ -1,4 +1,4 @@
-#include <kernel/io/kterm.h>
+#include <kernel/io/fdo.h>
 
 #ifndef NDEBUG
 extern void __assert_func(const char * file, int line, const char * func, const char * failedexpr);

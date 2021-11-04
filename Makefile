@@ -7,7 +7,7 @@ i686-build-grub-iso: iso-clean i686-build-kernel
 	mkdir -p isodir/boot/grub
 	cp kernel/kernel.elf isodir/boot/kernel.elf
 	cp boot/grub.cfg isodir/boot/grub/grub.cfg
-	grub-mkrescue -o HOS.iso isodir/
+	grub-mkrescue -o NekOS.iso isodir/
 
 i686-build-kernel:
 	make -C kernel/ -f Makefile ARCH_FAMILY="x86" ARCH="i686"

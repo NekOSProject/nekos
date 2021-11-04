@@ -1,10 +1,10 @@
-# Defauls:
+# Defaults:
 ARCH_FAMILY=x86
 ARCH=i686
 
 CROSS_СС=$(ARCH)-elf-gcc
 CROSS_AS=$(ARCH)-elf-as
-KERNEL_CFLAGS=-std=gnu11 -ffreestanding -Wall -Wextra -g
+KERNEL_CFLAGS=-std=gnu11 -ffreestanding -Wall -Wextra -DARCH_$(ARCH) -g
 KERNEL_LDFLAGS=-ffreestanding -nostdlib -lgcc
 
 KERNEL_OBJS =  $(filter-out arch/*, $(patsubst %.c,%.o,$(wildcard *.c)))
