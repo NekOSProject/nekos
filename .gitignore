@@ -8,3 +8,5 @@ kernel/*/*.o
 kernel/*/*/*.o
 kernel/*/*/*/*.o
 kernel/*.elf
+__pycache__/
+*.py[cod]
