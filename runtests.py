@@ -1,8 +1,14 @@
 #!/usr/bin/python3
+# Copyright 2021 Nekos Team
+# Published under MIT License
+
 import os
 import sys
 from importlib.machinery import SourceFileLoader
 import timeit
+
+sys.path.append('test')
+import common
 
 root_dir = os.getcwd()
 tests = []
@@ -24,9 +30,15 @@ for test in tests:
 
     os.chdir(test_dir)
     start = timeit.default_timer()
-    result = SourceFileLoader("test", "test.py").load_module().run()
+    try:
+        SourceFileLoader("test", "test.py").load_module().run()
+    except common.TestTimeoutException:
+        result = "TIMEOUT"
+    except common.TestFailureException:
+        result = "FAILURE"
+    else:
+        result = "SUCCESS"
     finish = timeit.default_timer()
-    result = "SUCCESS" if result else "FAILURE"
     print(f"{test}: {result} ({finish - start:.2f} seconds)")
     os.chdir(root_dir)
 
