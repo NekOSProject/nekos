@@ -18,11 +18,14 @@ class TestFailureException(Exception):
 class Qemu:
     def __init__(self, popen):
         self.popen = popen
+        # Qemu needs time to create log files
+        while not os.path.exists("debug.log"):
+            self.wait(0.1)
 
     def wait_for_debug_log(self, needle, timeout = 1):
         needle = bytes(needle, "utf-8")
         start = timeit.default_timer()
-        stdout = open("stdout.log", "rb")
+        stdout = open("debug.log", "rb")
         log = b""
 
         # While no timeout, read and search logs
@@ -55,14 +58,17 @@ class Qemu:
         self.kill()
         raise TestTimeoutException()
 
+    def wait(self, seconds = 0.25):
+        time.sleep(seconds)
+
 def run_qemu(arch):
-    s = f"qemu-system-{arch} -kernel ../../kernel/kernel.elf -debugcon stdio"
+    s = f"qemu-system-{arch} -nographic -kernel ../../kernel/kernel.elf -debugcon file:debug.log"
     a = shlex.split(s)
-    fout = open("stdout.log", "wb")
-    ferr = open("stderr.log", "wb")
-    return subprocess.Popen(a, bufsize = 0, stdout = fout, stderr = ferr, start_new_session = True)
+    return subprocess.Popen(a, bufsize = 0, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL, stdin = subprocess.DEVNULL, start_new_session = True)
 
 def run_i686():
+    if os.path.exists("debug.log"):
+        os.remove("debug.log")
     popen = run_qemu("i386")
     return Qemu(popen)
 
