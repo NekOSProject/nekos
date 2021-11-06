@@ -57,7 +57,7 @@ void kmain(struct multiboot* mboot, u32 mboot_magic) {
         uintptr_t right_addr = left_addr + phys_free_map[i].length - 1;
         if (left_addr <= KERNEL_START_PHYS && KERNEL_END_PHYS <= right_addr) {
             if (right_addr - PAGE_ALIGN_UP(KERNEL_END_PHYS) + 1 >= mem_total / 8 ) { // mem_total/8 is phys mm bitmap size
-                bitmap_addr = (u64*)PAGE_ALIGN_UP(KERNEL_END_PHYS);
+                bitmap_addr = PAGE_ALIGN_UP(KERNEL_END_PHYS);
                 break;
             } else {
                 printk_dup("Cannot place phys bitmap after kernel. Halting...\n");
