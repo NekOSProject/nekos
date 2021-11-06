@@ -1,3 +1,6 @@
+# Copyright 2021 Nekos Team
+# Published under MIT License
+
 import os
 import sys
 import re
@@ -121,7 +124,6 @@ def parse_c_dependencies(filename):
     dependencies += translate_local_includes_of_file(include_local, filename)
     dependencies += translate_global_includes(include_global)
     check_included_files_exist(dependencies)
-    print(f"Dependencies of {filename}: {dependencies}")
     check_time = time.time()
     return DependencyInfo(check_time, dependencies)
 
@@ -215,7 +217,7 @@ if __name__ == '__main__':
     if os.path.exists("build/dependency_infos.pickle"):
         dependency_infos = pickle.load(open("build/dependency_infos.pickle", "rb"))
         if dependency_infos["\\version//"] < actual_dependency_infos_version:
-            os.remove("build/dependency_infos.pickle") # What was wrong with the file?
+            os.remove("build/dependency_infos.pickle") # The file is old, get rid of it
             dependency_infos = {}
     analise_dependencies(dependency_infos, sources)
     if not os.path.exists("build"):
@@ -225,7 +227,7 @@ if __name__ == '__main__':
 
     sources_to_compile = find_sources_to_be_compiled(dependency_infos, sources)
 
-    if (len(sources_to_compile) == 0):
+    if len(sources_to_compile) == 0 and os.path.exists("kernel/kernel.elf"):
         print("Nothing to be done")
         exit()
 
@@ -252,4 +254,5 @@ if __name__ == '__main__':
     objects = " ".join(objects)
     linker_script = f"kernel/arch/{ARCH_FAMILY}/{ARCH}/link.ld"
     print("Linkng...")
-    os.system(f"ld.lld -T {linker_script} -o kernel/kernel.elf {objects}")
+    linker = "ld.lld" if is_win32 else "lld"
+    os.system(f"{linker} -T {linker_script} -o kernel/kernel.elf {objects}")
