@@ -38,7 +38,7 @@ void kmain(struct multiboot* mboot, u32 mboot_magic) {
     physmem_free_map_entry_t phys_free_map[memmap_entries_count];
     int phys_free_map_len = 0;
     for (int i = 0; i < memmap_entries_count; i++) {
-        if (memmap[i].type = MULTIBOOT_MEMORY_AVAILABLE) {
+        if (memmap[i].type == MULTIBOOT_MEMORY_AVAILABLE) {
             phys_free_map[phys_free_map_len++] = (physmem_free_map_entry_t){memmap[i].base_addr, memmap[i].length};
         }
     }
