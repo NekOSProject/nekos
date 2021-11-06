@@ -8,6 +8,8 @@ extern uintptr_t phys_bitmap_start;
 extern uintptr_t phys_bitmap_end;
 
 typedef struct {
-    u64 addr;
-    u64 length;
+    uintptr_t addr;
+    size_t length;
 } physmem_free_map_entry_t;
+
+void physmem_init(uintptr_t bitmap_addr, physmem_free_map_entry_t free_map[], size_t free_map_length, size_t mem_total);
