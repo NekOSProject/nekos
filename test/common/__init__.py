@@ -3,11 +3,20 @@
 
 import io
 import os
+import sys
 import subprocess
 import timeit
 import time
 import shlex
+import shutil
 import signal
+
+sys.path.append('../../')
+import build
+
+is_win32 = True if sys.platform == "win32" else False
+is_linux = True if sys.platform == "linux" or sys.platform == "linux2" else False
+is_osx = True if sys.platform == "darwin" else False
 
 class TestTimeoutException(Exception):
     pass
@@ -48,7 +57,11 @@ class Qemu:
         self.timeout()
 
     def kill(self):
-        os.killpg(os.getpgid(self.popen.pid), signal.SIGTERM)
+        if is_win32:
+            # FIXME: This is shit, isn't there anything better?
+            subprocess.Popen(f"TASKKILL /F /PID {self.popen.pid} /T", stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL, stdin = subprocess.DEVNULL)
+        else:
+            os.killpg(os.getpgid(self.popen.pid), signal.SIGTERM)
 
     def failure(self):
         self.kill()
@@ -62,9 +75,18 @@ class Qemu:
         time.sleep(seconds)
 
 def run_qemu(arch):
-    s = f"qemu-system-{arch} -nographic -kernel ../../kernel/kernel.elf -debugcon file:debug.log"
+    qemu_command = f"qemu-system-{arch}"
+    flags = ""
+    if is_win32:
+        qemu_full_path = shutil.which(qemu_command)
+        qemu_directory = build.get_file_directory(qemu_full_path)
+        flags += f"-L {qemu_directory}"
+    s = f"{qemu_command} -nographic {flags} -kernel ../../kernel/kernel.elf -debugcon file:debug.log"
     a = shlex.split(s)
-    return subprocess.Popen(a, bufsize = 0, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL, stdin = subprocess.DEVNULL, start_new_session = True)
+    if is_win32:
+        return subprocess.Popen(s, bufsize = 0, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL, stdin = subprocess.DEVNULL, shell = True, start_new_session = True)
+    else:
+        return subprocess.Popen(a, bufsize = 0, stdout = subprocess.DEVNULL, stderr = subprocess.DEVNULL, stdin = subprocess.DEVNULL, start_new_session = True)
 
 def run_i686():
     if os.path.exists("debug.log"):
