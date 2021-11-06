@@ -10,3 +10,4 @@ kernel/*/*/*/*.o
 kernel/*.elf
 __pycache__/
 *.py[cod]
+build
