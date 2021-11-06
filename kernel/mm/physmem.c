@@ -6,11 +6,11 @@
 
 // bitmap bitness
 // how many bits stores one element of bitmap
-#define BB 64
+#define BB 8
 
 #define PREF "[PMM]: "
 
-static u64* bitmap;
+static u8* bitmap;
 static size_t page_count;
 static size_t used_page_count;
 static size_t first_free_page; // index of first free phys page
@@ -60,14 +60,9 @@ void physmem_init(uintptr_t bitmap_addr, physmem_free_map_entry_t free_map[], si
     printk_dup(PREF "used_page_count = %u\n", used_page_count);
     first_free_page = (size_t)-1;
     last_free_page = (size_t)-1;
-    bitmap = (u64 *)bitmap_addr;
+    bitmap = (u8*)bitmap_addr;
     size_t bitmap_size = page_count / 8;
     memset(bitmap, 0xFF, bitmap_size); // mark all pages as used
-    // for (size_t i = 0; i < bitmap_size; i++) {
-    //     if (*((u8*)bitmap + i) != 0xFF) {
-    //         printk_dup("i = %u\n", i);
-    //     }
-    // }
     phys_bitmap_start = (uintptr_t)bitmap;
     phys_bitmap_end = phys_bitmap_start + bitmap_size;
     printk_dup(PREF "Physical memory bitmap placed in [%x:%x]\n", phys_bitmap_start, phys_bitmap_end);
