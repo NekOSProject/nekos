@@ -8,11 +8,16 @@ import pickle
 import time
 
 class DependencyInfo:
-    def __init__(self, check_time, dependencies):
+    def __init__(self, check_time, dependencies, not_found_dependencies):
         assert(isinstance(check_time, float)) # Returned from os.path.getmtime
         assert(isinstance(dependencies, list)) # List of files
         self.check_time = check_time
+        # It's like an identifier of run that created this DependencyInfo
+        # Each run build.py creates unique analise_start_time
+        # (which is just execution time of analise_dependencies function)
+        self.analise_start_time = 0
         self.dependencies = dependencies
+        self.not_found_dependencies = not_found_dependencies
         # To prevent recursive search of newer include (updated dependency)
         # If we checked the include and got that it's newer - we just return
         # If we checked the include and got that it's older - we put the (time
@@ -68,6 +73,10 @@ def get_file_directory(path):
     else:
         return "." # Just a filename, let's return current folder
 
+def get_filename(path):
+    path = path.replace("\\", "/")
+    return path.split('/')[-1]
+
 def create_dirs_for_file(file):
     dir_path = get_file_directory(file)
     os.makedirs(dir_path, exist_ok = True)
@@ -82,14 +91,15 @@ def make_boot_first(objects):
     objects[0], objects[i] = objects[i], objects[0]
     return objects
 
-def check_included_files_exist(paths):
-    was_error = False
+def existing_dependencies(paths):
+    existing_files = []
+    not_found = []
     for path in paths:
         if not os.path.exists(path):
-            print(f"Can't find included file: {path}")
-            was_error = True
-    if was_error:
-        exit(1)
+            not_found.append(path)
+        else:
+            existing_files.append(path)
+    return (existing_files, not_found)
 
 # Takes "includes" and source file name and returns
 # paths of the includes relative to current working directory
@@ -102,18 +112,10 @@ def translate_local_includes_of_file(includes, filename):
     includes = [ i.replace("\\", "/") for i in includes ]
     return includes
 
-freestanding_includes = [
-    "limits.h",
-    "stdint.h",
-    "stddef.h",
-    "stdbool.h",
-    "stdarg.h",
-]
-
 # Takes <includes> and returns paths of the includes
 # relative to current working directory
 def translate_global_includes(includes):
-    return [ i for i in includes if i not in freestanding_includes ]
+    return includes
 
 def parse_c_dependencies(filename):
     with open(filename) as c_file:
@@ -123,9 +125,9 @@ def parse_c_dependencies(filename):
     dependencies = []
     dependencies += translate_local_includes_of_file(include_local, filename)
     dependencies += translate_global_includes(include_global)
-    check_included_files_exist(dependencies)
+    (dependencies, not_found) = existing_dependencies(dependencies)
     check_time = time.time()
-    return DependencyInfo(check_time, dependencies)
+    return DependencyInfo(check_time, dependencies, not_found)
 
 def parse_gas_dependencies(filename):
     # GNU Assembler uses C preprocessor
@@ -140,23 +142,72 @@ def parse_dependencies(filename):
         print(f"How to parse dependencies of {filename}?")
         exit(-1)
 
+freestanding_includes = [
+    "limits.h",
+    "float.h",
+    "stdint.h",
+    "stddef.h",
+    "stdbool.h",
+    "stdarg.h",
+    "stdalign.h",
+    "iso646.h",
+    "stdlib.h",
+]
+
+def analise_file_dependencies(dependency_infos, source, analise_start_time):
+    # Prevent recursion: this checks whether dependencies of the file was analized in current run
+    if source in dependency_infos and dependency_infos[source].analise_start_time == analise_start_time:
+        return
+
+    # If a source (probably include file) does not exist - warn about it and exit
+    if not os.path.exists(source):
+        print(f"WARNING: {source} not found, but was included and found last time")
+        return
+
+    # If we have no dependency info for this file or of the file was changed, scan its dependencies
+    filemtime = os.path.getmtime(source)
+    if source not in dependency_infos or filemtime > dependency_infos[source].check_time:
+        dependency_infos[source] = parse_dependencies(source)
+
+    # Mark the file as analized in current run
+    dependency_infos[source].analise_start_time = analise_start_time
+
+    # Then analise dependencies of its dependencies
+    for dependency in dependency_infos[source].dependencies:
+        analise_file_dependencies(dependency_infos, dependency, analise_start_time)
+
+    # Warn if some dependencies aren't found
+    # And if the dependencies aren't freesnanding include files
+    not_found_dependencies_that_are_found_now = []
+    for path in dependency_infos[source].not_found_dependencies:
+        if get_filename(path) in freestanding_includes:
+            continue
+        # Now it exists, all OK
+        if os.path.exists(path):
+            not_found_dependencies_that_are_found_now.append(path)
+            continue
+        print(f"{source}: ({dependency_infos[source].analise_start_time} == {analise_start_time}) WARNING: Can't find included file: {path}, so can't trace it's change\n"
+              + "  NOTE: Wrong name of file?\n"
+              + "  NOTE: File not in freestanding_includes list?\n"
+              + "  NOTE: File is in include (-I) directory?\n"
+              + "  TODO: Include file directory (-I) analise isn't implemented\n")
+
+    for found_now in not_found_dependencies_that_are_found_now:
+        dependency_infos[source].not_found_dependencies.remove(found_now)
+        dependency_infos[source].dependencies.append(found_now)
+
 def analise_dependencies(dependency_infos, sources):
-    analised_sources = []
+    analise_start_time = time.time()
 
     for source in sources:
-        # Dependencies of each source are cached in dependency_infos.pickle file
-        filemtime = os.path.getmtime(source)
-        if source not in dependency_infos or filemtime > dependency_infos[source].check_time:
-            dependency_infos[source] = parse_dependencies(source)
-            analised_sources.append(source)
-
-    for source in analised_sources:
-        # Update dependencies of the dependencies
-        analise_dependencies(dependency_infos, dependency_infos[source].dependencies)
+        analise_file_dependencies(dependency_infos, source, analise_start_time)
 
 def has_dependency_newer_than_time(dependency_infos, source, time):
     dependencies = dependency_infos[source].dependencies
     for dependency in dependencies:
+        # The file is removed, so compilation result should change
+        if not os.path.exists(dependency):
+            return True
         if dependency_infos[dependency].was_tested_on == time:
             # We got to this inculude second time
             # And it's older than time
@@ -212,8 +263,9 @@ if __name__ == '__main__':
     sources += collect_sources(f"kernel/arch/{ARCH_FAMILY}/{ARCH}")
 
     # Cached dict of "filename" -> DependencyInfo
+    # Contains information about a source file (its dependencies and other stuff)
     dependency_infos = {}
-    actual_dependency_infos_version = 1
+    actual_dependency_infos_version = 9
     if os.path.exists("build/dependency_infos.pickle"):
         dependency_infos = pickle.load(open("build/dependency_infos.pickle", "rb"))
         if dependency_infos["\\version//"] < actual_dependency_infos_version:
