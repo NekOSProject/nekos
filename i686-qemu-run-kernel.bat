@@ -1,1 +1,1 @@
-qemu-system-i386 -m 512 -kernel kernel/kernel.elf
+qemu-system-i386 -m 512 -kernel kernel/kernel.elf -debugcon stdio > nekos.log

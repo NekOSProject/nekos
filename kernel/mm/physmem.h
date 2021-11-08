@@ -14,5 +14,8 @@ typedef struct {
 
 void physmem_free_pages(uintptr_t addr, size_t n);
 void physmem_mark_pages_as_used(uintptr_t addr, size_t n);
+uintptr_t physmem_alloc_pages(size_t n);
+
+void physmem_test();
 
 void physmem_init(uintptr_t bitmap_addr, physmem_free_map_entry_t free_map[], size_t free_map_length, size_t mem_total);
