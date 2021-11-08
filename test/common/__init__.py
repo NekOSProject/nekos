@@ -30,16 +30,16 @@ class Qemu:
         # Qemu needs time to create log files
         while not os.path.exists("debug.log"):
             self.wait(0.1)
+        self.debug = open("debug.log", "rb")
 
     def wait_for_debug_log(self, needle, timeout = 1):
         needle = bytes(needle, "utf-8")
         start = timeit.default_timer()
-        stdout = open("debug.log", "rb")
         log = b""
 
         # While no timeout, read and search logs
         while timeit.default_timer() - start < timeout:
-            log += stdout.read(1)
+            log += self.debug.read(1)
             if needle in log:
                 return
 
