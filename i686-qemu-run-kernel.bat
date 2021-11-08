@@ -1,0 +1,1 @@
+qemu-system-i386 -m 512 -kernel kernel/kernel.elf

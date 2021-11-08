@@ -49,7 +49,7 @@ void kmain(struct multiboot* mboot, u32 mboot_magic) {
         mem_total += (size_t)memmap[i].length;
     }
 
-    uintptr_t bitmap_addr;
+    uintptr_t bitmap_addr = 0;
     printk_dup(PREF "phys free map:\n");
     for (int i = 0; i < phys_free_map_len; i++) {
         printk_dup("    base = %x, len = %x\n", (u32)phys_free_map[i].addr, (u32)phys_free_map[i].length);
