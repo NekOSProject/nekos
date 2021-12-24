@@ -24,8 +24,8 @@
 .global start
 .type start, @function
 
-.extern kmain
-.type kmain, @function
+.extern arch_kmain
+.type arch_kmain, @function
 
 start:
     cli 				     # Block interrupts
@@ -33,7 +33,7 @@ start:
     and     $-16, %esp       # Make sure our stack is 16-byte aligned
     pushl   %eax             # Multiboot magic number
     pushl   %ebx             # Multiboot structure
-    call    kmain
+    call    arch_kmain
     hlt 				     # Halt the CPU
 
 .section .bss

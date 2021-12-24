@@ -21,7 +21,7 @@ static struct {
 
 typedef void (*idt_gate_t)(void);
 
-extern void idt_load(uintptr_t);
+extern "C" void idt_load(uintptr_t);
 
 void idt_set_gate(u8 num, idt_gate_t base, u16 sel, u8 flags) {
     idt.entries[num].base_low = ((uintptr_t)base & 0xFFFF);
@@ -31,7 +31,7 @@ void idt_set_gate(u8 num, idt_gate_t base, u16 sel, u8 flags) {
     idt.entries[num].flags = flags | 0x60;
 }
 
-void idt_install(void) {
+void idt_install() {
     idt_pointer_t *idtp = &idt.pointer;
     idtp->limit = sizeof idt.entries - 1;
     idtp->base = (uintptr_t)&idt.entries[0];

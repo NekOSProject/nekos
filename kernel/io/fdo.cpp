@@ -64,7 +64,7 @@ void fdo_puthex(void (*pc)(char), u32 i) {
     pc(hex[n]);
 }
 
-void fdo_print(void (*pc)(char), char *format, va_list args) {
+void fdo_print(void (*pc)(char), const char *format, va_list args) {
     if (pc == NULL) return;
     int i = 0;
     char *string;
@@ -102,20 +102,20 @@ void fdo_print(void (*pc)(char), char *format, va_list args) {
     }
 }
 
-void printk_dup(char *fmt, ... ) {
+void printk_dup(const char *fmt, ... ) {
     va_list args;
     va_start(args, fmt);
     fdo_print(putchar_log_callback, fmt, args);
     fdo_print(putchar_screen_callback, fmt, args);
 }
 
-void printk_screen(char *fmt, ... ) {
+void printk_screen(const char *fmt, ... ) {
     va_list args;
     va_start(args, fmt);
     fdo_print(putchar_screen_callback, fmt, args);
 }
 
-void printk_log(char *fmt, ... ) {
+void printk_log(const char *fmt, ... ) {
     va_list args;
     va_start(args, fmt);
     fdo_print(putchar_log_callback, fmt, args);

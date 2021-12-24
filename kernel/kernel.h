@@ -4,4 +4,8 @@
 #include <kernel/io/fdo.h>
 #include <kernel/mm/physmem.h>
 
-int generic_main(void);
+namespace kernel {
+
+int kmain();
+
+};

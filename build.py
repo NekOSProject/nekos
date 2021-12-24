@@ -42,20 +42,20 @@ def collect_files(ext, folder = "kernel", recursive = True):
     return files
 
 def collect_c_files(folder = "kernel", recursive = True):
-    return collect_files(".c", folder = folder, recursive = recursive)
+    return collect_files(".cpp", folder = folder, recursive = recursive)
 
 def collect_S_files(folder = "kernel", recursive = True):
     return collect_files(".S", folder = folder, recursive = recursive)
 
 def collect_sources(folder = "kernel", recursive = True):
-    return (collect_files(".c", folder = folder, recursive = recursive) +
+    return (collect_files(".cpp", folder = folder, recursive = recursive) +
             collect_files(".S", folder = folder, recursive = recursive))
 
 def remove_arch_sources(files):
     return [f for f in files if not f.startswith("kernel/arch")]
 
 def filter_c_sources(files):
-    return [f for f in files if f.endswith(".c")]
+    return [f for f in files if f.endswith(".cpp")]
 
 def filter_S_sources(files):
     return [f for f in files if f.endswith(".S")]
@@ -134,7 +134,7 @@ def parse_gas_dependencies(filename):
     return parse_c_dependencies(filename)
 
 def parse_dependencies(filename):
-    if filename.endswith(".c") or filename.endswith(".h"):
+    if filename.endswith(".cpp") or filename.endswith(".h"):
         return parse_c_dependencies(filename)
     elif filename.endswith(".S") or filename.endswith(".s"):
         return parse_gas_dependencies(filename)
@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
     ARCH="i686"
     ARCH_FAMILY = arch_to_family[ARCH]
-    cflags = f"-std=gnu11 -ffreestanding -Wall -Wextra -g -DARCH_{ARCH} --target={ARCH}-unknown-linux-gnu"
+    cppflags = f"-std=c++17 -ffreestanding -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-strict-aliasing -fno-stack-protector -Wall -Wextra -g -DARCH_{ARCH} --target={ARCH}-unknown-linux-gnu"
     aflags = f"-ffreestanding -g --target={ARCH}-unknown-linux-gnu"
     lflags = f"-ffreestanding -nostdlib"
 
@@ -291,14 +291,14 @@ if __name__ == '__main__':
         source_object = source_path_to_object_path(source)
         create_dirs_for_file(source_object)
         print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
-        os.system(f"clang {cflags} -I . -c {source} -o {source_object}")
+        os.system(f"clang {cppflags} -I . -c {source} -o {source_object}")
         source_counter += 1
 
     for source in S_sources:
         source_object = source_path_to_object_path(source)
         create_dirs_for_file(source_object)
         print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
-        os.system(f"clang {aflags} -I . -c {source} -o {source_object}")
+        os.system(f"clang++ {aflags} -I . -c {source} -o {source_object}")
         source_counter += 1
 
     objects = [ source_path_to_object_path(s) for s in sources ]

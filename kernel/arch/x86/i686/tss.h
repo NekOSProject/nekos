@@ -2,7 +2,7 @@
 
 #include <kernel/types.h>
 
-extern void tss_flush(void);
+extern "C" void tss_flush(void);
 
 typedef struct tss_entry {
 	u32	prev_tss;
