@@ -8,13 +8,12 @@
 #include <kernel/mm/memlayout.h>
 #include <kernel/mm/physmem.h>
 #include <kernel/kernel.h>
-
-extern void gdt_install();
-extern void idt_install();
+#include "gdt.h"
+#include "idt.h"
 
 extern "C" void arch_kmain(struct multiboot* mboot, u32 mboot_magic) {
 
-    printk_log("Hello, world!\n");
+    printk_log("Hello, World!\n");
 
     vgatext_init((void *)0xB8000);
 
