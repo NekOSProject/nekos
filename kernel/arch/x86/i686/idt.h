@@ -12,17 +12,17 @@ typedef struct {
 
 typedef struct {
     u16 limit;
-    uintptr_t base;
+    u32 base;
 } __attribute__((packed)) idt_pointer_t;
 
-static struct {
+typedef struct {
     idt_entry_t entries[256];
     idt_pointer_t pointer;
-} idt __attribute__((used));
+} __attribute__((packed)) idt_t;
 
 using idt_gate_t = void (*)();
 
-extern "C" void idt_load(uintptr_t);
+extern "C" void idt_load(idt_pointer_t *);
 
 void idt_set_gate(u8 num, idt_gate_t base, u16 sel, u8 flags);
 void idt_install();
