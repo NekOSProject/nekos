@@ -2,7 +2,7 @@
 
 #include <kernel/types.h>
 
-#define PORT_COM1 0x3f8
+static constexpr u16 PORT_COM1 = 0x3F8;
 
 u8  inb(u16 port);
 u16 inw(u16 port);

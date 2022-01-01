@@ -2,19 +2,19 @@
 
 static idt_t idt;
 
-void idt_set_gate(u8 num, idt_gate_t base, u16 sel, u8 flags) {
-    idt.entries[num].base_low = ((uintptr_t)base & 0xFFFF);
-    idt.entries[num].base_high = ((uintptr_t)base >> 16) & 0xFFFF;
-    idt.entries[num].sel = sel;
-    idt.entries[num].zero = 0;
-    idt.entries[num].flags = flags | 0x60;
+void idt_set_gate(u8 num, void* isr, u16 cs, u8 flags) {
+    idt.entries[num].isr_low = ((uintptr_t)isr & 0xFFFF);
+    idt.entries[num].isr_high = ((uintptr_t)isr >> 16) & 0xFFFF;
+    idt.entries[num].cs = cs;
+    idt.entries[num].reserved = 0;
+    idt.entries[num].flags = flags;
 }
 
 void idt_install() {
-    idt_pointer_t *idtp = &idt.pointer;
-    idtp->limit = sizeof idt.entries - 1;
-    idtp->base = (u32)&idt.entries[0];
-    memset(&idt.entries[0], 0, sizeof idt.entries);
-
-    idt_load(idtp);
+    idtr_t *idtr = &idt.idtr;
+    idtr->limit = IDT_MAX_DESCRIPTORS - 1;
+    idtr->base = (u32)&idt.entries[0];
+    memset(&idt.entries[0], 0, IDT_MAX_DESCRIPTORS);
+    
+    idt_load(idtr);
 }

@@ -3,10 +3,8 @@
 #include <kernel/types.h>
 #include "ports.h"
 
-#define VGA_WIDTH 80
-#define VGA_HEIGHT 25
-#define VGA_W_x_H 2000
-#define VGA_TEXT_MEMORY_PHYS 0xB8000
+static constexpr u32 VGA_WIDTH =  80;
+static constexpr u32 VGA_HEIGHT = 25;
 
 // VGA colors
 enum vgatext_color {

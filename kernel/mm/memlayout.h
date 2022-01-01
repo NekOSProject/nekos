@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define PAGE_SIZE 4096
+static constexpr size_t PAGE_SIZE = 4096;
 
 #define KERNEL_START_PHYS ((uintptr_t)&kernel_phys_start)
 #define KERNEL_END_PHYS ((uintptr_t)&kernel_phys_end)
