@@ -41,7 +41,7 @@ def collect_files(ext, folder = "kernel", recursive = True):
             files += collect_files(ext, folder = item, recursive = recursive)
     return files
 
-def collect_c_files(folder = "kernel", recursive = True):
+def collect_cpp_files(folder = "kernel", recursive = True):
     return collect_files(".cpp", folder = folder, recursive = recursive)
 
 def collect_S_files(folder = "kernel", recursive = True):
@@ -54,7 +54,7 @@ def collect_sources(folder = "kernel", recursive = True):
 def remove_arch_sources(files):
     return [f for f in files if not f.startswith("kernel/arch")]
 
-def filter_c_sources(files):
+def filter_cpp_sources(files):
     return [f for f in files if f.endswith(".cpp")]
 
 def filter_S_sources(files):
@@ -283,11 +283,11 @@ if __name__ == '__main__':
         print("Nothing to be done")
         exit()
 
-    c_sources = filter_c_sources(sources_to_compile)
+    cpp_sources = filter_cpp_sources(sources_to_compile)
     S_sources = filter_S_sources(sources_to_compile)
 
     source_counter = 1
-    for source in c_sources:
+    for source in cpp_sources:
         source_object = source_path_to_object_path(source)
         create_dirs_for_file(source_object)
         print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
