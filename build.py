@@ -6,8 +6,11 @@ import sys
 import re
 import pickle
 import time
+from timeit import default_timer as timer
 
 multithreaded = True
+
+timer_start = timer()
 
 if multithreaded:
     from multiprocessing.pool import ThreadPool
@@ -365,3 +368,5 @@ if __name__ == '__main__':
     print("Linkng...")
     linker = "ld.lld" if is_win32 else "lld"
     os.system(f"{linker} -T {linker_script} -o kernel/kernel.elf {objects}")
+    timer_end = timer()
+    print(f"Elapsed time: {timer_end - timer_start:.4}")
