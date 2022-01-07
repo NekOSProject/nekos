@@ -1,0 +1,9 @@
+#pragma once
+
+enum class termcolors {
+    BLACK, BLUE, GREEN, CYAN,
+    RED, MAGENTA, BROWN, LIGHT_GREY,
+    DARK_GREY, LIGHT_BLUE, LIGHT_GREEN, LIGHT_CYAN,
+    LIGHT_RED, LIGHT_MAGENTA, LIGHT_YELLOW, WHITE,
+};
+

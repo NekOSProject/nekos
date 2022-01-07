@@ -11,10 +11,9 @@ void idt_set_gate(u8 num, void* isr, u16 cs, u8 flags) {
 }
 
 void idt_install() {
-    idtr_t *idtr = &idt.idtr;
-    idtr->limit = IDT_MAX_DESCRIPTORS - 1;
-    idtr->base = (u32)&idt.entries[0];
+    idt.idtr.limit = IDT_MAX_DESCRIPTORS - 1;
+    idt.idtr.base = (u32)&idt.entries[0];
     memset(&idt.entries[0], 0, IDT_MAX_DESCRIPTORS);
     
-    idt_load(idtr);
+    idt_load(&idt.idtr);
 }

@@ -18,6 +18,22 @@ void fdo_set_putchar_log_callback(void (*p)(char)) {
     putchar_log_callback = p;
 }
 
+void fdo_set_text_color(termcolors text_color) {
+    #if defined ARCH_i686
+    vgatext_setcolor(vgatext_entry_color(text_color, termcolors::BLACK));
+    #else
+    #error Error
+    #endif
+}
+
+void fdo_set_default_text_color() {
+    #if defined ARCH_i686
+    vgatext_setcolor(vgatext_entry_color(termcolors::LIGHT_GREY, termcolors::BLACK));
+    #else
+    #error Error
+    #endif
+}
+
 void fdo_putstring(void (*pc)(char), const char* str) {
     while (*str) {
         pc(*str);
@@ -91,6 +107,12 @@ void fdo_print(void (*pc)(char), const char *format, va_list args) {
                 break;
             case 'x':
                 fdo_puthex(pc, va_arg(args, u32));
+                break;
+            case 'w':
+                fdo_set_text_color(va_arg(args, termcolors));
+                break;
+            case 'y':
+                fdo_set_default_text_color();
                 break;
             default:
                 pc(format[i]);

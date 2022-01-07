@@ -9,18 +9,10 @@ u8 vgatext_color;
 
 bool vgatext_initialized = false;
 
-static inline uint8_t vgatext_entry_color(enum vgatext_color fg, enum vgatext_color bg) {
-    return fg | bg << 4;
-}
-
-static inline u16 vgatext_entry(unsigned char uc, uint8_t color) {
-    return (u16) uc | (u16) color << 8;
-}
-
 void vgatext_init(void *_vgatext_base) {
     vgatext_row = 0;
     vgatext_column = 0;
-    vgatext_color = vgatext_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+    vgatext_color = vgatext_entry_color(termcolors::LIGHT_GREY, termcolors::BLACK);
     vgatext_buffer = (u16*)_vgatext_base;
 
     for (u32 y = 0; y < VGA_HEIGHT; y++) {

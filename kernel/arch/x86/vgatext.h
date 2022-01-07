@@ -1,31 +1,19 @@
 #pragma once
 
 #include <kernel/types.h>
+#include <kernel/io/termcolors.h>
 #include "ports.h"
 
 static constexpr u32 VGA_WIDTH  = 80;
 static constexpr u32 VGA_HEIGHT = 25;
 
-// VGA colors
-enum vgatext_color {
-    VGA_COLOR_BLACK = 0,
-    VGA_COLOR_BLUE = 1,
-    VGA_COLOR_GREEN = 2,
-    VGA_COLOR_CYAN = 3,
-    VGA_COLOR_RED = 4,
-    VGA_COLOR_MAGENTA = 5,
-    VGA_COLOR_BROWN = 6,
-    VGA_COLOR_LIGHT_GREY = 7,
-    VGA_COLOR_DARK_GREY = 8,
-    VGA_COLOR_LIGHT_BLUE = 9,
-    VGA_COLOR_LIGHT_GREEN = 10,
-    VGA_COLOR_LIGHT_CYAN = 11,
-    VGA_COLOR_LIGHT_RED = 12,
-    VGA_COLOR_LIGHT_MAGENTA = 13,
-    VGA_COLOR_LIGHT_YELLOW = 14,
-    VGA_COLOR_WHITE = 15,
-};
+static inline u8 vgatext_entry_color(termcolors fg, termcolors bg) {
+    return (u8)fg | (u8)bg << 4;
+}
 
+static inline u16 vgatext_entry(unsigned char uc, u8 color) {
+    return (u16) uc | (u16) color << 8;
+}
 
 void vgatext_putchar(char c);
 

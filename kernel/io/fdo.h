@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <kernel/types.h>
 #include <kernel/libk/string.h>
+#include "termcolors.h"
 
 #define FDO_KERNEL "[KERNEL]: "
 #define FDO_ARCH_i686 "[ARCH i686]: "
