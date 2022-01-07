@@ -6,7 +6,7 @@
 
 // bitmap bitness
 // how many bits stores one element of bitmap
-#define BB 8
+static constexpr size_t BB =  8;
 
 namespace physmem {
 

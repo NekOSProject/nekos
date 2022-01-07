@@ -3,7 +3,7 @@
 #include <kernel/types.h>
 #include "ports.h"
 
-static constexpr u32 VGA_WIDTH =  80;
+static constexpr u32 VGA_WIDTH  = 80;
 static constexpr u32 VGA_HEIGHT = 25;
 
 // VGA colors
