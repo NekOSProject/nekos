@@ -6,6 +6,17 @@ import sys
 import re
 import pickle
 import time
+from timeit import default_timer as timer
+
+multithreaded = True
+
+timer_start = timer()
+
+if multithreaded:
+    from multiprocessing.pool import ThreadPool
+    from threading import Lock
+    pool = ThreadPool()
+    compilation_result_output_lock = Lock()
 
 class DependencyInfo:
     def __init__(self, check_time, dependencies, not_found_dependencies):
@@ -41,7 +52,7 @@ def collect_files(ext, folder = "kernel", recursive = True):
             files += collect_files(ext, folder = item, recursive = recursive)
     return files
 
-def collect_c_files(folder = "kernel", recursive = True):
+def collect_cpp_files(folder = "kernel", recursive = True):
     return collect_files(".cpp", folder = folder, recursive = recursive)
 
 def collect_S_files(folder = "kernel", recursive = True):
@@ -54,7 +65,7 @@ def collect_sources(folder = "kernel", recursive = True):
 def remove_arch_sources(files):
     return [f for f in files if not f.startswith("kernel/arch")]
 
-def filter_c_sources(files):
+def filter_cpp_sources(files):
     return [f for f in files if f.endswith(".cpp")]
 
 def filter_S_sources(files):
@@ -242,6 +253,42 @@ def find_sources_to_be_compiled(dependency_infos, sources):
         to_be_compiled.append(source)
     return to_be_compiled
 
+def compile_cpp(source):
+    global cppflags
+    global source_counter
+    global compiling_now_sources
+    global sources_to_compile_count
+
+    compiling_now_sources.add(source)
+    source_object = source_path_to_object_path(source)
+    create_dirs_for_file(source_object)
+    os.system(f"clang {cppflags} -I . -c {source} -o {source_object}")
+    return source
+
+def compile_S(source):
+    global aflags
+    global source_counter
+    global compiling_now_sources
+    global sources_to_compile_count
+
+    compiling_now_sources.add(source)
+    source_object = source_path_to_object_path(source)
+    create_dirs_for_file(source_object)
+    os.system(f"clang++ {aflags} -I . -c {source} -o {source_object}")
+    return source
+
+def compile_success(source):
+    global source_counter
+    global sources_to_compile_count
+    global compiling_now_sources
+    with compilation_result_output_lock:
+        compiling_now_sources.remove(source)
+        print(f"[{source_counter}/{sources_to_compile_count}] Building {source}... Done")
+        source_counter += 1
+
+def compile_failure(result):
+    print(f"FAILURE: {result}")
+
 if __name__ == '__main__':
     is_win32 = True if sys.platform == "win32" else False
     is_linux = True if sys.platform == "linux" or sys.platform == "linux2" else False
@@ -278,28 +325,41 @@ if __name__ == '__main__':
     pickle.dump(dependency_infos, open("build/dependency_infos.pickle", "wb"))
 
     sources_to_compile = find_sources_to_be_compiled(dependency_infos, sources)
+    sources_to_compile_count = len(sources_to_compile)
 
     if len(sources_to_compile) == 0 and os.path.exists("kernel/kernel.elf"):
         print("Nothing to be done")
         exit()
 
-    c_sources = filter_c_sources(sources_to_compile)
+    cpp_sources = filter_cpp_sources(sources_to_compile)
     S_sources = filter_S_sources(sources_to_compile)
 
+    compiling_now_sources = set()
     source_counter = 1
-    for source in c_sources:
-        source_object = source_path_to_object_path(source)
-        create_dirs_for_file(source_object)
-        print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
-        os.system(f"clang {cppflags} -I . -c {source} -o {source_object}")
-        source_counter += 1
+
+    for source in cpp_sources:
+        if multithreaded:
+            pool.apply_async(compile_cpp, args = (source,), callback = compile_success, error_callback = compile_failure)
+        else:
+            source_object = source_path_to_object_path(source)
+            create_dirs_for_file(source_object)
+            print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
+            os.system(f"clang {cppflags} -I . -c {source} -o {source_object}")
+            source_counter += 1
 
     for source in S_sources:
-        source_object = source_path_to_object_path(source)
-        create_dirs_for_file(source_object)
-        print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
-        os.system(f"clang++ {aflags} -I . -c {source} -o {source_object}")
-        source_counter += 1
+        if multithreaded:
+            pool.apply_async(compile_S, args = (source,), callback = compile_success, error_callback = compile_failure)
+        else:
+            source_object = source_path_to_object_path(source)
+            create_dirs_for_file(source_object)
+            print(f"[{source_counter}/{len(sources_to_compile)}] Building {source}...")
+            os.system(f"clang++ {aflags} -I . -c {source} -o {source_object}")
+            source_counter += 1
+
+    if multithreaded:
+        pool.close()
+        pool.join()
 
     objects = [ source_path_to_object_path(s) for s in sources ]
     make_boot_first(objects)
@@ -308,3 +368,5 @@ if __name__ == '__main__':
     print("Linkng...")
     linker = "ld.lld" if is_win32 else "lld"
     os.system(f"{linker} -T {linker_script} -o kernel/kernel.elf {objects}")
+    timer_end = timer()
+    print(f"Elapsed time: {timer_end - timer_start:.4}")
