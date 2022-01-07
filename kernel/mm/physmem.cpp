@@ -120,7 +120,7 @@ void init(uintptr_t bitmap_addr, free_map_entry_t free_map[], size_t free_map_le
 
 void test() {
     // TODO: remove (u32) . Now it used cuz printk cannot print 64 bit numbers
-    printk_dup(FDO_PHYSMEM "Starting PMM test\n");
+    printk_dup(FDO_PHYSMEM "%wStarting PMM test%y\n", termcolors::LIGHT_BLUE);
     printk_dup(FDO_PHYSMEM "start_search_free_page = %u end_search_free_page = %u\n", start_search_free_page, end_search_free_page);
     
     uintptr_t x = alloc_pages(1);
@@ -137,7 +137,7 @@ void test() {
     free_pages(x, 1);
     printk_dup(FDO_PHYSMEM "start_search_free_page = %u end_search_free_page = %u\n", start_search_free_page, end_search_free_page);
     printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %x\n", (u32)alloc_pages(1));
-    printk_dup(FDO_PHYSMEM "PMM test ended\n");
+    printk_dup(FDO_PHYSMEM "%wPMM test ended%y\n", termcolors::LIGHT_BLUE);
 }
 
 };

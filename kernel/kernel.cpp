@@ -7,11 +7,9 @@
 namespace kernel {
 
 int kmain() {
-    printk_dup(FDO_KERNEL "Hello from kmain()\n");
+    printk_dup(FDO_KERNEL "%wHello from kmain()%y\n", termcolors::LIGHT_GREEN);
 
     physmem::test();
-
-    printk_dup(FDO_KERNEL "%wTest%y %u %wcolors%y %u\n", termcolors::LIGHT_GREEN, 1337, termcolors::LIGHT_CYAN, 356253);
 
     while (1) {}
     
