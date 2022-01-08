@@ -11,7 +11,11 @@ int kmain() {
 
     physmem::test();
 
-    while (1) {}
+    // infinite loop. volatile preserves from optimizing out.
+    volatile int a = 1;
+    while (1) {
+        a = 0;
+    }
     
     return 0;
 }
