@@ -1,7 +1,7 @@
 #include <kernel/types.h>
 
 int memcmp(const void *s1, const void *s2, size_t n);
-void *memcpy(void *s1, const void *s2, size_t n);
+extern "C" void *memcpy(void *s1, const void *s2, size_t n);
 void *memmove(void *s1, const void *s2, size_t n);
 void *memset(void *s, int c, size_t n);
 
