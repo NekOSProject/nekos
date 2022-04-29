@@ -7,4 +7,5 @@
 idt_load:
     mov 4(%esp), %eax
     lidt (%eax)
+    sti # enable interrupts
     ret

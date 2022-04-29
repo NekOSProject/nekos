@@ -8,10 +8,10 @@ namespace kernel {
 
 int kmain() {
 
-    volatile int x = 0;
-    volatile int y = 5 / x;
-    (void)x;
-    (void)y;
+    // volatile int x = 0;
+    // volatile int y = 5 / x;
+    // (void)x;
+    // (void)y;
 
     printk_dup(FDO_KERNEL "%wHello from kmain()%y\n", termcolors::LIGHT_GREEN);
 
@@ -23,7 +23,7 @@ int kmain() {
     while (1) {
         a = 0;
     }
-    
+
     return 0;
 }
 

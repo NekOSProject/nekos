@@ -1,3 +1,5 @@
+#pragma once
+
 #include <kernel/types.h>
 
 typedef struct {
@@ -12,6 +14,8 @@ using interrupt_handler_t = void (*)(interrupt_ctx_t);
 void set_interrupt_handler(u8 num, interrupt_handler_t handler);
 extern "C" void common_interrupt_handler(interrupt_ctx_t regs);
 void divide_by_zero(interrupt_ctx_t regs);
+
+void fault_handler(interrupt_ctx_t regs);
 
 
 // interrupt handlers declarations:
@@ -48,21 +52,21 @@ extern "C" void interrupt_handler29();
 extern "C" void interrupt_handler30();
 extern "C" void interrupt_handler31();
 
-// extern "C" void interrupt_handler32();
-// extern "C" void interrupt_handler33();
-// extern "C" void interrupt_handler34();
-// extern "C" void interrupt_handler35();
-// extern "C" void interrupt_handler36();
-// extern "C" void interrupt_handler37();
-// extern "C" void interrupt_handler38();
-// extern "C" void interrupt_handler39();
-// extern "C" void interrupt_handler40();
-// extern "C" void interrupt_handler41();
-// extern "C" void interrupt_handler42();
-// extern "C" void interrupt_handler43();
-// extern "C" void interrupt_handler44();
-// extern "C" void interrupt_handler45();
-// extern "C" void interrupt_handler46();
-// extern "C" void interrupt_handler47();
+extern "C" void interrupt_handler32();
+extern "C" void interrupt_handler33();
+extern "C" void interrupt_handler34();
+extern "C" void interrupt_handler35();
+extern "C" void interrupt_handler36();
+extern "C" void interrupt_handler37();
+extern "C" void interrupt_handler38();
+extern "C" void interrupt_handler39();
+extern "C" void interrupt_handler40();
+extern "C" void interrupt_handler41();
+extern "C" void interrupt_handler42();
+extern "C" void interrupt_handler43();
+extern "C" void interrupt_handler44();
+extern "C" void interrupt_handler45();
+extern "C" void interrupt_handler46();
+extern "C" void interrupt_handler47();
 
 
