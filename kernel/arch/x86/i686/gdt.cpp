@@ -57,10 +57,10 @@ void gdt_install() {
     gdtp->base = (uintptr_t)&gdt.entries[0];
 
     gdt_set_gate(0, 0, 0, 0, 0);                // NULL segment
-    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Code segment
-    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Data segment
-    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User code
-    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User data
+    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); // Kernel Code segment
+    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF); // Kernel Data segment
+    gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User code segment
+    gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User data segment
     write_tss(5, 0x10, 0x0);
     gdt_set_gate(6, 0, 0xFFFFFFFF, 0xF2, 0xCF);
 

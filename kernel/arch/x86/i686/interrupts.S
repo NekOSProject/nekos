@@ -75,21 +75,18 @@ common_interrupt_handler_wrapper:
     mov     %ds, %ax
     push    %eax
 
-    // load kernel DS
-    mov     $0x10, %ax // NOTE: why 0x10?
+    // load kernel data segment selector (0x10) to DS and ES, FS, GS
+    mov     $0x10, %ax
     mov     %ax, %ds
-     // NOTE: why need this three lines
     mov     %ax, %es
     mov     %ax, %fs
     mov     %ax, %gs
 
-
     call    common_interrupt_handler
 
-    // restore previous DS
+    // restore previous DS, ES, FS, GS values
     pop     %eax
     mov     %ax, %ds
-    // NOTE: why need this three lines
     mov     %ax, %es
     mov     %ax, %fs
     mov     %ax, %gs
