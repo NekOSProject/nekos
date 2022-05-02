@@ -103,31 +103,30 @@ static inline void buffer_write(struct buffer *buf, char c)
 
 #define MAX_BASE 16
 
-uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t *rem_p) {
+uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t *rem_ptr) {
     uint64_t quot = 0, qbit = 1;
     if (den == 0) {
-    /* Intentional divide by zero, without
-        triggering a compiler warning which
-        would abort the build */
+        // Divide by zero to trigger error
         return 1/((unsigned)den); 
     }
-    /* Left-justify denominator and count shift */
+    // Left-justify denominator and count shift
     while ((int64_t)den >= 0) {
         den <<= 1;
         qbit <<= 1;
     }
     while (qbit) {
         if ( den <= num ) {
-        num -= den;
-        quot += qbit;
+            num -= den;
+            quot += qbit;
         }
         den >>= 1;
         qbit >>= 1;
     }
-    if (rem_p)
-        *rem_p = num;
+    if (rem_ptr) {
+        *rem_ptr = num;
+    }
     return quot;
- }
+}
 
 static void buffer_write_int(struct buffer *buf, uintmax_t iv, int flags, size_t width, size_t precision, int ilen, int base)
 {
