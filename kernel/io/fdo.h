@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <kernel/types.h>
 #include <kernel/libk/string.h>
+#include <kernel/libk/sprintf.h>
 #include "termcolors.h"
 
 #define FDO_KERNEL "[KERNEL]: "

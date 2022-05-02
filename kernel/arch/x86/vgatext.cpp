@@ -41,6 +41,18 @@ void vgatext_setcolor(u8 color) {
     vgatext_color = color;
 }
 
+void vgatext_set_text_color(u8 color) {
+    vgatext_color >>= 4;
+    vgatext_color <<= 4;
+    vgatext_color |= color;
+}
+
+void vgatext_set_bg_color(u8 color) {
+    vgatext_color <<= 4;
+    vgatext_color >>= 4;
+    vgatext_color |= (color << 4);
+}
+
 void vgatext_putchar(char c) {
     if (c != '\n') {
         vgatext_putentryat(c, vgatext_color, vgatext_column, vgatext_row);

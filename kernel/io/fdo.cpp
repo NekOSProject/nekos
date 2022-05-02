@@ -10,6 +10,8 @@ void (*putchar_screen_callback)(char) = 0;
 void (*putchar_log_callback)(char) = 0;
 #endif
 
+char buffer[512];
+
 void fdo_set_putchar_screen_callback(void (*p)(char)) {
     putchar_screen_callback = p;
 }
@@ -18,15 +20,7 @@ void fdo_set_putchar_log_callback(void (*p)(char)) {
     putchar_log_callback = p;
 }
 
-void fdo_set_text_color(termcolors text_color) {
-    #if defined ARCH_i686
-    vgatext_setcolor(vgatext_entry_color(text_color, termcolors::BLACK));
-    #else
-    #error Error
-    #endif
-}
-
-void fdo_set_default_text_color() {
+void fdo_set_default_color() {
     #if defined ARCH_i686
     vgatext_setcolor(vgatext_entry_color(termcolors::LIGHT_GREY, termcolors::BLACK));
     #else
@@ -34,94 +28,75 @@ void fdo_set_default_text_color() {
     #endif
 }
 
+void fdo_set_text_color(termcolors text_color) {
+     #if defined ARCH_i686
+    vgatext_set_text_color((u8)text_color);
+    #else
+    #error Error
+    #endif
+}
+
+void fdo_set_bg_color(termcolors bg_color) {
+     #if defined ARCH_i686
+    vgatext_set_bg_color((u8)bg_color);
+    #else
+    #error Error
+    #endif
+}
+
 void fdo_putstring(void (*pc)(char), const char* str) {
+    int state = 0, num = 0;
     while (*str) {
-        pc(*str);
+
+        if (state == 0) {
+            if (*str == '\x1b') {
+                state = 1;
+            } else {
+                pc(*str);
+            }
+        } else if (state == 1) {
+            if (*str == '[') {
+                state = 2;
+            } else {
+                pc(*str);
+            }
+        } else if (state == 2) {
+            if (isdigit(*str)) {
+                num = num*10 + (*str - '0');
+            } else if (*str == ';' || *str == 'm') {
+                switch (num) {
+                    case 0: fdo_set_default_color(); break;
+                    case 30: fdo_set_text_color(termcolors::BLACK); break;
+                    case 31: fdo_set_text_color(termcolors::LIGHT_RED); break;
+                    case 32: fdo_set_text_color(termcolors::LIGHT_GREEN); break;
+                    case 33: fdo_set_text_color(termcolors::LIGHT_YELLOW); break;
+                    case 34: fdo_set_text_color(termcolors::LIGHT_BLUE); break;
+                    case 35: fdo_set_text_color(termcolors::LIGHT_MAGENTA); break;
+                    case 36: fdo_set_text_color(termcolors::LIGHT_CYAN); break;
+                    case 37: fdo_set_text_color(termcolors::WHITE); break;
+                    case 40: fdo_set_bg_color(termcolors::BLACK); break;
+                    case 41: fdo_set_bg_color(termcolors::LIGHT_RED); break;
+                    case 42: fdo_set_bg_color(termcolors::LIGHT_GREEN); break;
+                    case 43: fdo_set_bg_color(termcolors::LIGHT_YELLOW); break;
+                    case 44: fdo_set_bg_color(termcolors::LIGHT_BLUE); break;
+                    case 45: fdo_set_bg_color(termcolors::LIGHT_MAGENTA); break;
+                    case 46: fdo_set_bg_color(termcolors::LIGHT_CYAN); break;
+                    case 47: fdo_set_bg_color(termcolors::WHITE); break;
+                }
+                num = 0;
+                if (*str == 'm') {
+                    state = 0;
+                }
+            }
+        }
         str++;
     }
 }
 
-void fdo_putuint(void (*pc)(char), int i) {
-    u32 n, d = 1000000000;
-    char str[255];
-    u32 dec_index = 0;
-    while ( ( i/d == 0 ) && ( d >= 10 ) ) d /= 10;
-    n = i;
-    while (d >= 10) {
-        str[dec_index++] = ((char)((int)'0' + n/d));
-        n = n % d;
-        d /= 10;
-    }
-    str[dec_index++] = ((char)((int)'0' + n));
-    str[dec_index] = 0;
-    fdo_putstring(pc, str);
-}
-
-void fdo_putint(void (*pc)(char), int i) {
-    if(i >= 0) {
-        fdo_putuint(pc, i);
-    } else {
-        pc('-');
-        fdo_putuint(pc, -i);
-    }
-}
-
-void fdo_puthex(void (*pc)(char), u32 i) {
-    const u8 hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-    u32 n, d = 0x10000000;
-    fdo_putstring(pc, "0x");
-    while((i / d == 0) && (d >= 0x10)) d /= 0x10;
-    n = i;
-    while( d >= 0xF ) {
-        pc(hex[n/d]);
-        n = n % d;
-        d /= 0x10;
-    }
-    pc(hex[n]);
-}
-
 void fdo_print(void (*pc)(char), const char *format, va_list args) {
     if (pc == NULL) return;
-    int i = 0;
-    char *string;
-
-    while (format[i]) {
-        if (format[i] == '%') {
-            i++;
-            switch (format[i]) {
-            case 's':
-                string = va_arg(args, char*);
-                fdo_putstring(pc, string);
-                break;
-            case 'c':
-                pc(va_arg(args, int));
-                break;
-            case 'd':
-                fdo_putint(pc, va_arg(args, int));
-                break;
-            case 'i':
-                fdo_putint(pc, va_arg(args, int));
-                break;
-            case 'u':
-                fdo_putuint(pc, va_arg(args, unsigned int));
-                break;
-            case 'x':
-                fdo_puthex(pc, va_arg(args, u32));
-                break;
-            case 'w':
-                fdo_set_text_color(va_arg(args, termcolors));
-                break;
-            case 'y':
-                fdo_set_default_text_color();
-                break;
-            default:
-                pc(format[i]);
-            }
-        } else {
-            pc(format[i]);
-        }
-        i++;
-    }
+    vsprintf(buffer, format, args);
+    fdo_putstring(pc, buffer);
 }
 
 void printk_dup(const char *fmt, ... ) {

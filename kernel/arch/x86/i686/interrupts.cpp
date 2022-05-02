@@ -31,7 +31,7 @@ extern "C" void common_interrupt_handler(interrupt_ctx_t regs) {
 
 void divide_by_zero(interrupt_ctx_t regs) {
     (void)regs;
-    printk_dup(FDO_ARCH_i686 "%wDivide by zero!%y", termcolors::LIGHT_RED);
+    printk_dup(FDO_ARCH_i686 "\033[0;31mDivide by zero!\033[0m");
     asm("hlt");
 }
 

@@ -28,7 +28,7 @@ extern "C" void arch_kmain(struct multiboot* mboot, u32 mboot_magic) {
     idt_install();
     printk_dup(FDO_ARCH_i686 "IDT installed\n");
 
-    printk_dup(FDO_ARCH_i686 "kernel_phys_start = %x\n" FDO_ARCH_i686 "kernel_phys_end = %x\n", KERNEL_START_PHYS, KERNEL_END_PHYS);
+    printk_dup(FDO_ARCH_i686 "kernel_phys_start = %p\n" FDO_ARCH_i686 "kernel_phys_end = %p\n", KERNEL_START_PHYS, KERNEL_END_PHYS);
 
     #define DONT_USE_UP_TO 0x100000
 
@@ -50,7 +50,7 @@ extern "C" void arch_kmain(struct multiboot* mboot, u32 mboot_magic) {
     uintptr_t bitmap_addr = 0;
     printk_dup(FDO_ARCH_i686 "phys free map:\n");
     for (int i = 0; i < phys_free_map_len; i++) {
-        printk_dup("    base = %x, len = %x\n", (u32)phys_free_map[i].addr, (u32)phys_free_map[i].length);
+        printk_dup("    base = %p, len = %zu\n", phys_free_map[i].addr, phys_free_map[i].length);
         uintptr_t left_addr = phys_free_map[i].addr;
         uintptr_t right_addr = left_addr + phys_free_map[i].length - 1;
         if (left_addr <= KERNEL_START_PHYS && KERNEL_END_PHYS <= right_addr) {

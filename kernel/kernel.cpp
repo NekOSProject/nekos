@@ -22,7 +22,7 @@ int kmain() {
     // (void)x;
     // (void)y;
 
-    printk_dup(FDO_KERNEL "%wHello from kmain()%y\n", termcolors::LIGHT_GREEN);
+    printk_dup(FDO_KERNEL "\033[0;32mHello from kmain()\033[0m\n");
 
     physmem::test();
 

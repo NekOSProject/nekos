@@ -70,7 +70,7 @@ void mark_pages_as_used(uintptr_t addr, size_t n) {
 uintptr_t alloc_pages(size_t n) {
     size_t idx = start_search_free_page;
     while (idx <= end_search_free_page) {
-        // printk_dup("%u\n", idx);
+        // printk_dup("%zu\n", idx);
         if (!bitmap_test(idx)) {
             size_t start_idx = idx;
             while (!bitmap_test(idx) && idx <= end_search_free_page) {
@@ -89,15 +89,15 @@ uintptr_t alloc_pages(size_t n) {
 
 void init(uintptr_t bitmap_addr, free_map_entry_t free_map[], size_t free_map_length, size_t mem_total) {
     page_count = mem_total / PAGE_SIZE;
-    printk_dup(FDO_PHYSMEM "mem_total = %u bytes\n", mem_total);
+    printk_dup(FDO_PHYSMEM "mem_total = %zu bytes\n", mem_total);
     used_page_count = page_count;
-    printk_dup(FDO_PHYSMEM "used_page_count = %u\n", used_page_count);
+    printk_dup(FDO_PHYSMEM "used_page_count = %zu\n", used_page_count);
     bitmap = (u8*)bitmap_addr;
     size_t bitmap_size = page_count / 8;
     memset(bitmap, 0xFF, bitmap_size); // mark all pages as used
     phys_bitmap_start = (uintptr_t)bitmap;
     phys_bitmap_end = phys_bitmap_start + bitmap_size;
-    printk_dup(FDO_PHYSMEM "Physical memory bitmap placed in [%x:%x]\n", phys_bitmap_start, phys_bitmap_end);
+    printk_dup(FDO_PHYSMEM "Physical memory bitmap placed in [%p:%p]\n", phys_bitmap_start, phys_bitmap_end);
     // Now free available memory:
     bool search_bounds_undefined = true;    // true if start_search_free_page and end_search_free_page undefined
     for (size_t i = 0; i < free_map_length; i++) {
@@ -109,35 +109,35 @@ void init(uintptr_t bitmap_addr, free_map_entry_t free_map[], size_t free_map_le
             search_bounds_undefined = false;
         }    
         free_pages(addr_to_free, pages_to_free);
-        printk_dup(FDO_PHYSMEM "Freed addr = %x, length in pages = %u\n", free_map[i].addr, free_map[i].length / PAGE_SIZE);
+        printk_dup(FDO_PHYSMEM "Freed addr = %p, length in pages = %zu\n", free_map[i].addr, free_map[i].length / PAGE_SIZE);
     }
-    printk_dup(FDO_PHYSMEM "used_page_count = %u\n", used_page_count);
+    printk_dup(FDO_PHYSMEM "used_page_count = %zu\n", used_page_count);
 
     mark_pages_as_used(KERNEL_START_PHYS, KERNEL_SIZE / PAGE_SIZE + (KERNEL_SIZE % PAGE_SIZE != 0));
     mark_pages_as_used(phys_bitmap_start, bitmap_size / PAGE_SIZE + (bitmap_size % PAGE_SIZE != 0));
-    printk_dup(FDO_PHYSMEM "used_page_count = %u\n", used_page_count);
+    printk_dup(FDO_PHYSMEM "used_page_count = %zu\n", used_page_count);
 }
 
+// TODO: make this test automatic: add asserts
 void test() {
-    // TODO: remove (u32) . Now it used cuz printk cannot print 64 bit numbers
-    printk_dup(FDO_PHYSMEM "%wStarting PMM test%y\n", termcolors::LIGHT_BLUE);
-    printk_dup(FDO_PHYSMEM "start_search_free_page = %u end_search_free_page = %u\n", start_search_free_page, end_search_free_page);
+    printk_dup(FDO_PHYSMEM "\033[0;34mStarting PMM test\033[0m\n");
+    printk_dup(FDO_PHYSMEM "start_search_free_page = %zu end_search_free_page = %zu\n", start_search_free_page, end_search_free_page);
     
     uintptr_t x = alloc_pages(1);
-    printk_dup(FDO_PHYSMEM "x = physmem::alloc_pages(1) = %x\n", (u32)x);
+    printk_dup(FDO_PHYSMEM "x = physmem::alloc_pages(1) = %p\n", x);
     for (int i = 0; i < 4; i++) {
-        printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %x\n", (u32)alloc_pages(1));
+        printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %p\n", alloc_pages(1));
     }
-    printk_dup(FDO_PHYSMEM "physmem::alloc_pages(2) = %x\n", (u32)alloc_pages(2));
+    printk_dup(FDO_PHYSMEM "physmem::alloc_pages(2) = %p\n", alloc_pages(2));
     for (int i = 0; i < 3; i++) {
-        printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %x\n", (u32)alloc_pages(1));
+        printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %p\n", alloc_pages(1));
     }
-    printk_dup(FDO_PHYSMEM "start_search_free_page = %u end_search_free_page = %u\n", start_search_free_page, end_search_free_page);
-    printk_dup(FDO_PHYSMEM "physmem::free_pages(%x, 1)\n", (u32)x);
+    printk_dup(FDO_PHYSMEM "start_search_free_page = %zu end_search_free_page = %zu\n", start_search_free_page, end_search_free_page);
+    printk_dup(FDO_PHYSMEM "physmem::free_pages(%p, 1)\n", x);
     free_pages(x, 1);
-    printk_dup(FDO_PHYSMEM "start_search_free_page = %u end_search_free_page = %u\n", start_search_free_page, end_search_free_page);
-    printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %x\n", (u32)alloc_pages(1));
-    printk_dup(FDO_PHYSMEM "%wPMM test ended%y\n", termcolors::LIGHT_BLUE);
+    printk_dup(FDO_PHYSMEM "start_search_free_page = %zu end_search_free_page = %zu\n", start_search_free_page, end_search_free_page);
+    printk_dup(FDO_PHYSMEM "physmem::alloc_pages(1) = %p\n", alloc_pages(1));
+    printk_dup(FDO_PHYSMEM "\033[0;34mPMM test ended\033[0m\n");
 }
 
 };

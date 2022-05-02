@@ -20,6 +20,8 @@ void vgatext_putchar(char c);
 void vgatext_init(void *_vgatext_base);
 void vgatext_backspace();
 void vgatext_setcolor(u8 color);
+void vgatext_set_text_color(u8 color);
+void vgatext_set_bg_color(u8 color);
 void vgatext_scroll();
 void vgatext_write(const char* data, u32 size);
 void vgatext_update_cursor(u32 row, u32 col);
