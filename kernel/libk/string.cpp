@@ -5,7 +5,7 @@
 
 // Memory functions
 
-int memcmp(const void *s1, const void *s2, size_t n) {
+extern "C" int memcmp(const void *s1, const void *s2, size_t n) {
     const u8 *p1 = (const u8 *)s1;
     const u8 *p2 = (const u8 *)s2;
     while (n--) {
@@ -27,7 +27,7 @@ extern "C" void *memcpy(void *s1, const void *s2, size_t n) {
     return s1;
 }
 
-void *memmove(void *s1, const void *s2, size_t n) {
+extern "C" void *memmove(void *s1, const void *s2, size_t n) {
     char *dest = (char *)s1;
     const char *src = (const char *)s2;
     if (dest <= src) {
@@ -44,7 +44,7 @@ void *memmove(void *s1, const void *s2, size_t n) {
     return s1;
 }
 
-void *memset(void *s, int c, size_t n) {
+extern "C" void *memset(void *s, int c, size_t n) {
     u8 *p = (u8 *)s;
     while (n--) {
         *p++ = (u8)c;
@@ -114,6 +114,13 @@ size_t strlen(const char *s) {
         ++rc;
     }
     return rc;
+}
+
+size_t strnlen(const char *s, size_t n)
+{
+    size_t i;
+    for(i = 0; *s++ && i < n; i++);
+    return i;
 }
 
 char *strncat(char *s1, const char *s2, size_t n) {
